@@ -19,7 +19,6 @@
   <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"></a>
   <a href="https://vercel.com/"><img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Deployment"></a>
   <a href="https://www.deepseek.com/"><img src="https://img.shields.io/badge/DeepSeek-4A90E2?style=for-the-badge&logo=ai&logoColor=white" alt="DeepSeek API"></a>
-  <a href="https://github.com/yash1thredddy/ai-native-portfolio/stargazers"><img src="https://img.shields.io/github/stars/yash1thredddy/ai-native-portfolio?style=for-the-badge&color=ffd700" alt="Repo Stars"></a>
   <a href="https://github.com/yash1thredddy/ai-native-portfolio/graphs/contributors"><img src="https://img.shields.io/github/contributors/yash1thredddy/ai-native-portfolio?style=for-the-badge&color=ff69b4" alt="Contributors"></a>
 </p>
 

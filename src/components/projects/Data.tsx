@@ -7,37 +7,6 @@ import { Separator } from '@/components/ui/separator';
 // --- PROJECT DATABASE ---
 // This array holds the detailed information for each project.
 const PROJECT_CONTENT = [
-    {
-    // --- NEW AI-NATIVE PORTFOLIO PROJECT ---
-    title: 'AI-Native Portfolio',
-    description:
-      'An interactive AI-powered portfolio that goes beyond static pages. Built with Next.js and DeepSeek AI, this portfolio features a conversational AI that answers questions about my experience, projects, and skills in real time.',
-    techStack: [
-      'Next.js',
-      'React',
-      'TypeScript',
-      'Tailwind CSS',
-      'Framer Motion',
-      'DeepSeek API',
-      'Node.js',
-      'Vercel',
-    ],
-    date: 'January 2025',
-    links: [
-      {
-        name: 'Live Demo - You Are Here!',
-        url: '#',
-      },
-      {
-        name: 'GitHub Repository',
-        url: 'https://github.com/yash1thredddy/ai-native-portfolio',
-      },
-    ],
-    images: [
-      { src: '/projects/ai-portfolio-chat.png', alt: 'The AI Native Portfolio chat interface in action' },
-      { src: '/projects/ai-portfolio-home.png', alt: 'Homepage of the AI Native Portfolio' },
-    ],
-  },
   {
     title: 'Real-Time AI Bias Mitigation',
     description:
@@ -176,6 +145,36 @@ const PROJECT_CONTENT = [
       },
     ],
   },
+  {
+    // --- AI-NATIVE PORTFOLIO PROJECT ---
+    title: 'AI-Native Portfolio',
+    description:
+      'An interactive AI-powered portfolio that goes beyond static pages. Built with Next.js and DeepSeek AI, this portfolio features a conversational AI that answers questions about my experience, projects, and skills in real time.',
+    techStack: [
+      'Next.js',
+      'React',
+      'TypeScript',
+      'Tailwind CSS',
+      'Framer Motion',
+      'DeepSeek API',
+      'Node.js',
+      'Vercel',
+    ],
+    date: 'January 2025',
+    links: [
+      {
+        name: 'Live Demo - You Are Here!',
+        url: '#',
+      },
+      {
+        name: 'GitHub Repository',
+        url: 'https://github.com/yash1thredddy/ai-native-portfolio',
+      },
+    ],
+    images: [
+      { src: '/projects/ai-portfolio.png', alt: 'AI Native Portfolio' },
+    ],
+  },
 ];
 
 // --- COMPONENT & INTERFACE DEFINITIONS ---
@@ -279,14 +278,6 @@ const ProjectContent = ({ project }: { project: ProjectProps }) => {
 // --- MAIN DATA EXPORT ---
 // This is the data used by your main portfolio page.
 export const data = [
-   {
-    category: 'Full-Stack & AI',
-    title: 'AI-Native Portfolio',
-    src: '/projects/ai-portfolio-preview.png',
-    content: (
-      <ProjectContent project={{ title: 'AI-Native Portfolio' }} />
-    ),
-  },
   {
     category: 'AI/ML & Research',
     title: 'Real-Time AI Bias Mitigation',
@@ -325,6 +316,14 @@ export const data = [
     src: '/projects/multi-agent-orchestration.jpeg',
     content: (
       <ProjectContent project={{ title: 'Multi-Agent Orchestration Engine' }} />
+    ),
+  },
+  {
+    category: 'Full-Stack & AI',
+    title: 'AI-Native Portfolio',
+    src: '/projects/ai-portfolio.png',
+    content: (
+      <ProjectContent project={{ title: 'AI-Native Portfolio' }} />
     ),
   },
 ];
