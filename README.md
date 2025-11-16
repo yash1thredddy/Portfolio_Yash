@@ -52,8 +52,7 @@ It's a portfolio that doesn't just show—it demonstrates depth and breadth thro
 | **Frontend**      | [Next.js](https://nextjs.org/), [React](https://reactjs.org/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/) |
 | **Backend**       | [Node.js](https://nodejs.org/), Next.js API Routes, TypeScript                                                                     |
 | **AI & APIs**     | [DeepSeek API](https://www.deepseek.com/), [GitHub API](https://docs.github.com/en/rest)      |
-| **Deployment**    | [Vercel](https://vercel.com/)                                                                                         |
-| **Package Manager**| [pnpm](https://pnpm.io/)                                                                                              |
+| **Deployment**    | [Vercel](https://vercel.com/)                                                                                         |                                                                                            |
 
 ---
 
