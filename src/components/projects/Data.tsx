@@ -168,7 +168,7 @@ const PROJECT_CONTENT = [
       },
       {
         name: 'GitHub Repository',
-        url: 'https://github.com/yash1thredddy/ai-native-portfolio',
+        url: 'https://github.com/yash1thredddy/Portfolio_Yash',
       },
     ],
     images: [

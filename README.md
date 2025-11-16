@@ -14,12 +14,12 @@
 ### **Badges**
 
 <p align="center">
-  <img src="https://img.shields.io/github/repo-size/yash1thredddy/ai-native-portfolio?style=for-the-badge" alt="Repo Size">
-  <img src="https://img.shields.io/github/license/yash1thredddy/ai-native-portfolio?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/github/repo-size/yash1thredddy/Portfolio_Yash?style=for-the-badge" alt="Repo Size">
+  <img src="https://img.shields.io/github/license/yash1thredddy/Portfolio_Yash?style=for-the-badge" alt="License">
   <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"></a>
   <a href="https://vercel.com/"><img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Deployment"></a>
   <a href="https://www.deepseek.com/"><img src="https://img.shields.io/badge/DeepSeek-4A90E2?style=for-the-badge&logo=ai&logoColor=white" alt="DeepSeek API"></a>
-  <a href="https://github.com/yash1thredddy/ai-native-portfolio/graphs/contributors"><img src="https://img.shields.io/github/contributors/yash1thredddy/ai-native-portfolio?style=for-the-badge&color=ff69b4" alt="Contributors"></a>
+  <a href="https://github.com/yash1thredddy/Portfolio_Yash/graphs/contributors"><img src="https://img.shields.io/github/contributors/yash1thredddy/Portfolio_Yash?style=for-the-badge&color=ff69b4" alt="Contributors"></a>
 </p>
 
 ---
@@ -71,8 +71,8 @@ Want to get this project running on your local machine? Follow these simple step
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/yash1thredddy/ai-native-portfolio.git
-    cd ai-native-portfolio
+    git clone https://github.com/yash1thredddy/Portfolio_Yash.git
+    cd Portfolio_Yash
     ```
 
 2.  **Install dependencies:**
