@@ -46,10 +46,10 @@ interface AvatarProps {
 // Dynamic import of Avatar component
 const Avatar = dynamic<AvatarProps>(
   () =>
-    Promise.resolve(({ hasActiveTool, videoRef, isTalking }: AvatarProps) => {
+    Promise.resolve(() => {
       return (
         <div
-          className={`flex items-center justify-center rounded-full overflow-hidden transition-all duration-300 ${hasActiveTool ? 'h-20 w-20' : 'h-28 w-28'}`}
+          className="flex items-center justify-center rounded-full overflow-hidden h-24 w-24"
         >
           <div
             className="relative cursor-pointer"
@@ -160,7 +160,7 @@ const Chat = () => {
     }
 
     return result;
-  }, [messages]);
+  }, [messages.length, messages[messages.length - 1]?.id, messages[messages.length - 1]?.parts]);
 
   const isToolInProgress = messages.some(
     (m) =>
@@ -230,8 +230,8 @@ const Chat = () => {
   const isEmptyState =
     !currentAIMessage && !latestUserMessage && !loadingSubmit;
 
-  // Calculate header height based on hasActiveTool
-  const headerHeight = hasActiveTool ? 100 : 180;
+  // Use consistent header height to prevent layout shift/flickering
+  const headerHeight = 140;
 
   return (
     <div className="relative h-screen overflow-hidden">
@@ -258,9 +258,7 @@ const Chat = () => {
       <div
         className="fixed top-0 right-0 left-0 z-50 bg-gradient-to-b from-white via-white/95 via-50% to-transparent dark:from-black dark:via-black/95 dark:via-50% dark:to-transparent"
       >
-        <div
-          className={`transition-all duration-300 ease-in-out ${hasActiveTool ? 'pt-6 pb-0' : 'py-6'}`}
-        >
+        <div className="py-6">
           <div className="flex justify-center">
             <ClientOnly>
               <Avatar
@@ -300,7 +298,7 @@ const Chat = () => {
           className="flex-1 overflow-y-auto px-2"
           style={{ paddingTop: `${headerHeight}px` }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {isEmptyState ? (
               <motion.div
                 key="landing"
@@ -316,9 +314,9 @@ const Chat = () => {
               <motion.div
                 key={currentAIMessage.id || 'ai-message'}
                 className="pb-24 md:pb-32"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.15 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
               >
                 <SimplifiedChatView
                   message={currentAIMessage}
@@ -331,9 +329,9 @@ const Chat = () => {
               loadingSubmit && (
                 <motion.div
                   key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.15 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
                   className="px-4 pt-18"
                 >
                   <ChatBubble variant="received">

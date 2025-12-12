@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import CustomCursor from "@/components/ui/custom-cursor";
 import Script from "next/script";
 import "./globals.css";
 
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://yashwanth-portfolio.vercel.app",
+    url: "https://yashwanth.vercel.app",
     title: "Yashwanth Reddy - Software Engineer Portfolio",
     description: "E-Shaped Software Engineer - Distributed Systems, Backend, AI/ML, Full-Stack",
     siteName: "Yashwanth Reddy Portfolio",
@@ -106,6 +107,7 @@ export default function RootLayout({
           defaultTheme="light"
           enableSystem={false}
         >
+          <CustomCursor />
           <main className="flex min-h-screen flex-col">
             {children}
           </main>

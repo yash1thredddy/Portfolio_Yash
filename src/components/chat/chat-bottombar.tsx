@@ -45,7 +45,7 @@ export default function ChatBottombar({
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [inputRef]);
+  }, []);
 
   return (
     <motion.div
@@ -64,7 +64,7 @@ export default function ChatBottombar({
             placeholder={
               isToolInProgress ? 'Tool is in progress...' : 'Ask me anything'
             }
-            className="text-md w-full border-none bg-transparent text-black placeholder:text-gray-500 focus:outline-none"
+            className="text-md w-full border-none bg-transparent text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none"
             disabled={isToolInProgress || isLoading}
           />
 

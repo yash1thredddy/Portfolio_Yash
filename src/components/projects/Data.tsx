@@ -146,6 +146,56 @@ const PROJECT_CONTENT = [
     ],
   },
   {
+    title: 'Distributed Consensus KV Store',
+    description:
+      'Implemented a Raft-based distributed key-value store with leader election, log replication, and linearizable consistency, ensuring system availability during network partitions across a 5-node cluster. Designed a RocksDB-backed storage layer using LSM-tree batching, compaction, and snapshot recovery, utilizing Write-Ahead Logs (WAL) to guarantee durability under high write loads. Integrated Prometheus/Grafana and a React dashboard to visualize replication lag, commit index, and cluster health in real-time.',
+    techStack: [
+      'Go',
+      'gRPC',
+      'RocksDB',
+      'Raft Consensus',
+      'Prometheus',
+      'Grafana',
+      'React',
+      'Docker',
+    ],
+    date: 'October 2024',
+    links: [
+      {
+        name: 'GitHub Repository',
+        url: 'https://github.com/yash1thredddy',
+      },
+    ],
+    images: [
+      { src: '/projects/distributed-kv-store.jpg', alt: 'Distributed KV Store Architecture' },
+    ],
+  },
+  {
+    title: 'High-Performance Vector Search Engine',
+    description:
+      'Built an HNSW-based Approximate Nearest Neighbor (ANN) engine with AVX2 SIMD optimizations for top-k search, enabling low-latency embedding retrieval at scale. Implemented Product Quantization (PQ) achieving 4× memory reduction while preserving high recall on millions of vectors. Exposed C++ core via Pybind11 and FastAPI, enabling concurrent, low-latency serving for scalable, real-time ML pipelines.',
+    techStack: [
+      'C++',
+      'FastAPI',
+      'Python',
+      'SIMD (AVX2)',
+      'HNSW',
+      'Product Quantization',
+      'Pybind11',
+      'Docker',
+    ],
+    date: 'August 2024',
+    links: [
+      {
+        name: 'GitHub Repository',
+        url: 'https://github.com/yash1thredddy',
+      },
+    ],
+    images: [
+      { src: '/projects/vector-search.jpg', alt: 'Vector Search Engine Performance Metrics' },
+    ],
+  },
+  {
     // --- AI-NATIVE PORTFOLIO PROJECT ---
     title: 'AI-Native Portfolio',
     description:
@@ -316,6 +366,22 @@ export const data = [
     src: '/projects/multi-agent-orchestration.jpeg',
     content: (
       <ProjectContent project={{ title: 'Multi-Agent Orchestration Engine' }} />
+    ),
+  },
+  {
+    category: 'Distributed Systems',
+    title: 'Distributed Consensus KV Store',
+    src: '/projects/distributed-kv-store.jpg',
+    content: (
+      <ProjectContent project={{ title: 'Distributed Consensus KV Store' }} />
+    ),
+  },
+  {
+    category: 'AI/ML Infrastructure',
+    title: 'High-Performance Vector Search Engine',
+    src: '/projects/vector-search.jpg',
+    content: (
+      <ProjectContent project={{ title: 'High-Performance Vector Search Engine' }} />
     ),
   },
   {

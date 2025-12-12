@@ -20,7 +20,7 @@ export default function ToolRenderer({
   messageId,
 }: ToolRendererProps) {
   return (
-    <div className="w-full transition-all duration-300">
+    <div className="w-full">
       {toolInvocations.map((tool) => {
         const { toolCallId, toolName } = tool;
 

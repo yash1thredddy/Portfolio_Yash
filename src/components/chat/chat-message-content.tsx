@@ -9,7 +9,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 export type ChatMessageContentProps = {
   message: Message;
@@ -71,8 +71,9 @@ const CodeBlock = ({ content }: { content: string }) => {
   );
 };
 
-export default function ChatMessageContent({
+const ChatMessageContent = React.memo(function ChatMessageContent({
   message,
+  isLoading,
 }: ChatMessageContentProps) {
   // Only handle text parts
   const renderContent = () => {
@@ -128,5 +129,14 @@ export default function ChatMessageContent({
     });
   };
 
-  return <div className="w-full">{renderContent()}</div>;
-}
+  return (
+    <div
+      className={`w-full ${isLoading ? 'typing-cursor' : ''}`}
+      style={{ willChange: 'contents', contain: 'layout' }}
+    >
+      {renderContent()}
+    </div>
+  );
+});
+
+export default ChatMessageContent;

@@ -9,6 +9,7 @@ import { Message } from 'ai/react';
 import React from 'react';
 import ChatMessageContent from './chat-message-content';
 import ToolRenderer from './tool-renderer';
+import { SuggestedQuestions, getSuggestedQuestions } from './suggested-questions';
 
 interface SimplifiedChatViewProps {
   message: Message;
@@ -17,6 +18,7 @@ interface SimplifiedChatViewProps {
     chatRequestOptions?: ChatRequestOptions
   ) => Promise<string | null | undefined>;
   addToolResult?: (args: { toolCallId: string; result: string }) => void;
+  onQuestionClick?: (question: string) => void;
 }
 
 export const SimplifiedChatView = React.memo(function SimplifiedChatView({
@@ -51,10 +53,10 @@ export const SimplifiedChatView = React.memo(function SimplifiedChatView({
   return (
     <div className="flex h-full w-full flex-col px-4">
       {/* Single scrollable container for both tool and text content */}
-      <div className="custom-scrollbar flex h-full w-full flex-col overflow-y-auto">
+      <div className="custom-scrollbar flex h-full w-full flex-col overflow-y-auto" style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
         {/* Tool invocation result - displayed at the top */}
         {hasTools && (
-          <div className="mb-4 w-full">
+          <div className="mb-4 w-full animate-in slide-in-from-top-4 fade-in duration-500">
             <ToolRenderer
               toolInvocations={currentTool}
               messageId={message.id || 'current-msg'}
@@ -64,7 +66,7 @@ export const SimplifiedChatView = React.memo(function SimplifiedChatView({
 
         {/* Text content */}
         {hasTextContent && (
-          <div className="w-full">
+          <div className="w-full animate-in fade-in duration-300">
             <ChatBubble variant="received" className="w-full">
               <ChatBubbleMessage className="w-full">
                 <ChatMessageContent
