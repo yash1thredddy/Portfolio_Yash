@@ -1,10 +1,10 @@
 import { tool } from 'ai';
-import { z } from 'zod';
+import { jsonSchema } from '@ai-sdk/provider-utils';
 
 export const getSkills = tool({
   description:
     'Shows comprehensive list of technical skills across languages, frameworks, tools, and soft skills. Use when users ask about skills, tech stack, what technologies I know, or my technical expertise.',
-  parameters: z.object({}),
+  inputSchema: jsonSchema({ type: 'object', properties: {} }),
   execute: async () => {
     return `[INTERNAL DATA - DO NOT DISPLAY TO USER - USE THIS TO WRITE YOUR RESPONSE]
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Message } from 'ai/react';
+import type { UIMessage as Message } from 'ai';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
@@ -75,17 +75,32 @@ const ChatMessageContent = React.memo(function ChatMessageContent({
   message,
   isLoading,
 }: ChatMessageContentProps) {
-  // Only handle text parts
+  // Only handle text parts (AI SDK v5 can stream different text part variants)
   const renderContent = () => {
-    return message.parts?.map((part, partIndex) => {
-      if (part.type !== 'text' || !part.text) return null;
+    const parts = message.parts ?? [];
+    const textParts =
+      parts.length > 0
+        ? parts.filter(
+            // Accept any text-like part shape
+            (part: any) =>
+              (part.type === 'text' ||
+                part.type === 'text-delta' ||
+                part.type === 'output-text') &&
+              typeof part.text === 'string'
+          )
+        : typeof (message as any).content === 'string'
+        ? [{ type: 'text', text: (message as any).content }]
+        : [];
+
+    return textParts.map((part: any, partIndex: number) => {
+      if (!part.text) return null;
 
       // Split content by code block markers
       const contentParts = part.text.split('```');
 
       return (
         <div key={partIndex} className="w-full space-y-4">
-          {contentParts.map((content, i) =>
+          {contentParts.map((content: string, i: number) =>
             i % 2 === 0 ? (
               // Regular text content
               <div key={`text-${i}`} className="prose dark:prose-invert w-full">

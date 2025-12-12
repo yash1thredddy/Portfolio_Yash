@@ -137,10 +137,8 @@ export const Carousel = ({
                   opacity: 1,
                   y: 0,
                   transition: {
-                    duration: 0.5,
-                    delay: 0.2 * index,
-                    ease: 'easeOut',
-                    once: true,
+                    duration: 0.2,
+                    delay: Math.min(0.03 * index, 0.2), // Faster reveals
                   },
                 }}
                 key={'card' + index}

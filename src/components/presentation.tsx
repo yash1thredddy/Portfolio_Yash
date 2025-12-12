@@ -18,26 +18,25 @@ export function Presentation() {
       'https://images.unsplash.com/photo-1610216705422-caa3fcb6d158?q=80&w=3560&auto=format&fit=crop&ixlib=rb-4.0.3',
   };
 
-  // Animation variants for text elements
+  // Animation variants for text elements - Faster for immediate display
   const textVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: 'easeOut' },
+      transition: { duration: 0.3 },
     },
   };
 
-  // Animation for the entire paragraph rather than word-by-word
+  // Animation for the entire paragraph - Faster reveal
   const paragraphAnimation = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        ease: 'easeOut',
-        delay: 0.2,
+        duration: 0.3,
+        delay: 0.1,
       },
     },
   };

@@ -1,8 +1,5 @@
 // Cached versions of tools to reduce API calls
-import { tool } from 'ai';
-import { z } from 'zod';
 import { toolCache, createToolCacheKey } from './cache-utils';
-import * as originalTools from './tools/getContact';
 import { getContact } from './tools/getContact';
 import { getCrazy } from './tools/getCrazy';
 import { getInternship } from './tools/getInternship';
@@ -14,34 +11,29 @@ import { getSports } from './tools/getSports';
 import { getWeather } from './tools/getWeather';
 
 // Wrapper function to add caching to any tool
-function createCachedTool<TParams extends z.ZodTypeAny>(
+function createCachedTool(
   toolName: string,
   originalTool: any,
   ttlMinutes: number = 30
 ) {
-  return tool({
-    description: originalTool.description,
-    parameters: originalTool.parameters,
+  return {
+    ...originalTool,
     execute: async (params: any) => {
       const cacheKey = createToolCacheKey(toolName, params);
 
-      // Check cache first
       const cached = toolCache.get(cacheKey);
       if (cached !== undefined) {
         console.log(`[CACHE HIT] ${toolName}`);
         return cached;
       }
 
-      // Cache miss - execute original tool
       console.log(`[CACHE MISS] ${toolName}`);
-      const result = await originalTool.execute(params);
+      const result = await originalTool.execute?.(params);
 
-      // Store in cache
       toolCache.set(cacheKey, result, { ttl: 1000 * 60 * ttlMinutes });
-
       return result;
     },
-  });
+  };
 }
 
 // Export cached versions of all tools

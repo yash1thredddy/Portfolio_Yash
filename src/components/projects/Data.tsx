@@ -314,6 +314,7 @@ const ProjectContent = ({ project }: { project: ProjectProps }) => {
                   src={image.src}
                   alt={image.alt}
                   fill
+                  loading="lazy"
                   className="object-cover transition-transform"
                 />
               </div>

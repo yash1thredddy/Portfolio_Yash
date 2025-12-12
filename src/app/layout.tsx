@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import CustomCursor from "@/components/ui/custom-cursor";
 import Script from "next/script";
+import { PerformanceProvider } from "@/contexts/PerformanceContext";
 import "./globals.css";
 
 // Load Inter font for non-Apple devices
@@ -107,11 +108,13 @@ export default function RootLayout({
           defaultTheme="light"
           enableSystem={false}
         >
-          <CustomCursor />
-          <main className="flex min-h-screen flex-col">
-            {children}
-          </main>
-          <Toaster />
+          <PerformanceProvider>
+            <CustomCursor />
+            <main className="flex min-h-screen flex-col">
+              {children}
+            </main>
+            <Toaster />
+          </PerformanceProvider>
         </ThemeProvider>
         <Analytics />
       </body>

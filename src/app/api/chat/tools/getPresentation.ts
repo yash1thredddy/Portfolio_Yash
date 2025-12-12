@@ -1,10 +1,10 @@
 import { tool } from 'ai';
-import { z } from 'zod';
+import { jsonSchema } from '@ai-sdk/provider-utils';
 
 export const getPresentation = tool({
   description:
     'Shows a personal introduction and overview of Yashwanth. Use when users ask "Who are you?", "Tell me about yourself", "What do you do?", or want a general introduction.',
-  parameters: z.object({}),
+  inputSchema: jsonSchema({ type: 'object', properties: {} }),
   execute: async () => {
     return `[INTERNAL DATA - DO NOT DISPLAY TO USER - USE THIS TO WRITE YOUR RESPONSE]
 

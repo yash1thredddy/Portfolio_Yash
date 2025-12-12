@@ -1,12 +1,12 @@
 
 import { tool } from "ai";
-import { z } from "zod";
+import { jsonSchema } from "@ai-sdk/provider-utils";
 
 
 export const getProjects = tool({
   description:
     "Shows all projects by Yashwanth spanning Distributed Systems, Backend, Full-Stack, and AI/ML. Use when users ask about projects, side projects, what I've built, portfolio, or technical work.",
-  parameters: z.object({}),
+  inputSchema: jsonSchema({ type: "object", properties: {} }),
   execute: async () => {
     return `[INTERNAL DATA - DO NOT DISPLAY TO USER - USE THIS TO WRITE YOUR RESPONSE]
 
