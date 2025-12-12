@@ -53,7 +53,7 @@ export default function Home() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: 'ease', duration: 0.8 },
+      transition: { type: 'tween', ease: 'easeOut', duration: 0.8 },
     },
   };
   const bottomElementVariants = {
@@ -61,7 +61,7 @@ export default function Home() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: 'ease', duration: 0.8, delay: 0.2 },
+      transition: { type: 'tween', ease: 'easeOut', duration: 0.8, delay: 0.2 },
     },
   };
 
