@@ -8,13 +8,20 @@ interface PerformanceContextType {
   stopHeavyRendering: () => void;
 }
 
-const PerformanceContext = createContext<PerformanceContextType>({
-  isHeavyRendering: false,
-  startHeavyRendering: () => {},
-  stopHeavyRendering: () => {},
-});
+const PerformanceContext = createContext<PerformanceContextType | null>(null);
 
-export const usePerformance = () => useContext(PerformanceContext);
+export const usePerformance = () => {
+  const context = useContext(PerformanceContext);
+  if (!context) {
+    // Return safe defaults if context is not available (e.g., during SSR)
+    return {
+      isHeavyRendering: false,
+      startHeavyRendering: () => {},
+      stopHeavyRendering: () => {},
+    };
+  }
+  return context;
+};
 
 export const PerformanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isHeavyRendering, setIsHeavyRendering] = useState(false);

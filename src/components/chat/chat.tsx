@@ -84,79 +84,148 @@ const Chat = () => {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
 
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    stop,
-    setMessages,
-    setInput,
-    reload,
-    addToolResult,
-    append,
-  } = useChat({
-    onResponse: (response) => {
-      if (response) {
-        setLoadingSubmit(false);
-        setIsTalking(true);
-        if (videoRef.current) {
-          videoRef.current.play().catch((error) => {
-            console.error('Failed to play video:', error);
-          });
-        }
-      }
-    },
-    onFinish: () => {
-      setLoadingSubmit(false);
-      setIsTalking(false);
-      if (videoRef.current) {
-        videoRef.current.pause();
-      }
+  // AI SDK v5 has a completely new API!
+  // By default, it uses /api/chat endpoint
+  const chatHook = useChat({
+    // CRITICAL: Throttle UI updates to prevent freezing during streaming
+    // This batches updates every 50ms instead of on every chunk
+    experimental_throttle: 50, // Recommended value from AI SDK docs
+    onFinish: (message) => {
+      console.log('Message finished:', message);
     },
     onError: (error) => {
-      setLoadingSubmit(false);
-      setIsTalking(false);
-      if (videoRef.current) {
-        videoRef.current.pause();
-      }
-      console.error('Chat error:', error.message, error.cause);
-      toast.error(`Error: ${error.message}`);
-    },
-    onToolCall: (tool) => {
-      const toolName = tool.toolCall.toolName;
-      console.log('Tool call:', toolName);
+      console.error('Chat error:', error);
     },
   });
 
+  // Map new AI SDK v5 API to old variables
+  const messages = chatHook.messages || [];
+  const stop = chatHook.stop || (() => {});
+  const setMessages = chatHook.setMessages || (() => {});
+  // addToolResult signature changed in v5, but it's not used in this app
+  // Just pass undefined to components that accept it
+  const addToolResult = undefined;
+  
+  // New v5 API uses 'status' instead of 'isLoading'
+  // Valid statuses: 'submitted' | 'streaming' | 'ready' | 'error'
+  const isLoading = chatHook.status === 'submitted' || chatHook.status === 'streaming';
+  
+  // New v5 API uses 'sendMessage' instead of 'append'
+  const append = (message: any) => {
+    if (chatHook.sendMessage) {
+      // Extract content - handle both string and object
+      const content = typeof message === 'string' ? message : (message.content || '');
+      // AI SDK v5: sendMessage expects a message object with 'text' property
+      chatHook.sendMessage({
+        text: content
+      });
+    }
+  };
+  
+  // New v5 API uses 'regenerate' instead of 'reload'
+  // Wrap it to match the old signature
+  const reload = async (options?: any) => {
+    if (chatHook.regenerate) {
+      await chatHook.regenerate(options);
+    }
+    return null;
+  };
+  
+  // Manual input state management since v5 doesn't provide it
+  const [input, setInputState] = useState('');
+  
+  const setInput = (value: string) => {
+    setInputState(value);
+  };
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputState(e.target.value);
+  };
+  
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (input.trim() && chatHook.sendMessage) {
+      // AI SDK v5: sendMessage expects a message object with 'text' property
+      chatHook.sendMessage({
+        text: input.trim()
+      });
+      setInputState('');
+    }
+  };
+  
+  // Monitor status changes for video/talking state
+  useEffect(() => {
+    const status = chatHook.status;
+    if (status === 'streaming' || status === 'submitted') {
+      setLoadingSubmit(false);
+      setIsTalking(true);
+      if (videoRef.current) {
+        videoRef.current.play().catch((error) => {
+          console.error('Failed to play video:', error);
+        });
+      }
+    } else if (status === 'ready') {
+      setLoadingSubmit(false);
+      setIsTalking(false);
+      if (videoRef.current) {
+        videoRef.current.pause();
+      }
+    }
+  }, [chatHook.status]);
+  
+  // Handle errors
+  useEffect(() => {
+    if (chatHook.error) {
+      setLoadingSubmit(false);
+      setIsTalking(false);
+      if (videoRef.current) {
+        videoRef.current.pause();
+      }
+      console.error('Chat error:', chatHook.error);
+      toast.error(`Error: ${chatHook.error.message || 'Unknown error'}`);
+    }
+  }, [chatHook.error]);
+
   const { currentAIMessage, latestUserMessage, hasActiveTool } = useMemo(() => {
-    const latestAIMessageIndex = messages.findLastIndex(
-      (m) => m.role === 'assistant'
-    );
     const latestUserMessageIndex = messages.findLastIndex(
       (m) => m.role === 'user'
     );
 
-    const result = {
-      currentAIMessage:
-        latestAIMessageIndex !== -1 ? messages[latestAIMessageIndex] : null,
-      latestUserMessage:
-        latestUserMessageIndex !== -1 ? messages[latestUserMessageIndex] : null,
-      hasActiveTool: false,
-    };
-
-    if (result.currentAIMessage) {
-      result.hasActiveTool =
-        result.currentAIMessage.parts?.some(
-          (part) =>
-            part.type === 'tool-invocation' &&
-            part.toolInvocation?.state === 'result'
-        ) || false;
+    // Find the FIRST assistant message with a completed tool (not the latest!)
+    // This ensures we display tools from earlier messages even if newer streaming messages exist
+    let aiMessageWithTool = null;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'assistant') {
+        const hasTool = messages[i].parts?.some(
+          (part: any) =>
+            typeof part.type === 'string' &&
+            part.type.startsWith('tool-') &&
+            part.state === 'output-available'
+        );
+        if (hasTool) {
+          aiMessageWithTool = messages[i];
+          break; // Found it! Use this one
+        }
+      }
     }
 
+    // Fallback: if no message with tools, use the latest assistant message
+    const latestAIMessageIndex = messages.findLastIndex(
+      (m) => m.role === 'assistant'
+    );
+    const fallbackAIMessage = latestAIMessageIndex !== -1 ? messages[latestAIMessageIndex] : null;
+
+    const result = {
+      currentAIMessage: aiMessageWithTool || fallbackAIMessage,
+      latestUserMessage:
+        latestUserMessageIndex !== -1 ? messages[latestUserMessageIndex] : null,
+      hasActiveTool: !!aiMessageWithTool,
+    };
+
+    // Hide AI message if latest user message is newer
     if (latestAIMessageIndex < latestUserMessageIndex) {
       result.currentAIMessage = null;
+      result.hasActiveTool = false;
     }
 
     return result;
@@ -166,9 +235,9 @@ const Chat = () => {
     (m) =>
       m.role === 'assistant' &&
       m.parts?.some(
-        (part) =>
-          part.type === 'tool-invocation' &&
-          part.toolInvocation?.state !== 'result'
+        (part: any) =>
+          (part.type === 'tool-invocation' && part.toolInvocation?.state !== 'result') ||
+          (typeof part.type === 'string' && part.type.startsWith('tool-') && part.state !== 'output-available' && part.state !== 'output-error')
       )
   );
 
@@ -176,10 +245,12 @@ const Chat = () => {
   const submitQuery = (query) => {
     if (!query.trim() || isToolInProgress) return;
     setLoadingSubmit(true);
-    append({
-      role: 'user',
-      content: query,
-    });
+    // AI SDK v5: sendMessage expects an object with 'text' property
+    if (chatHook.sendMessage) {
+      chatHook.sendMessage({
+        text: query.trim(),
+      });
+    }
   };
 
   useEffect(() => {
@@ -192,7 +263,7 @@ const Chat = () => {
 
     if (initialQuery && !autoSubmitted) {
       setAutoSubmitted(true);
-      setInput('');
+      // Don't clear input, just submit the query
       submitQuery(initialQuery);
     }
   }, [initialQuery, autoSubmitted]);
@@ -213,8 +284,14 @@ const Chat = () => {
   const onSubmit = (e) => {
     e.preventDefault();
     if (!input.trim() || isToolInProgress) return;
-    submitQuery(input);
-    setInput('');
+    // Use handleSubmit which already clears input
+    if (chatHook.sendMessage) {
+      // AI SDK v5: sendMessage expects a message object with 'text' property
+      chatHook.sendMessage({
+        text: input.trim()
+      });
+      setInputState('');
+    }
   };
 
   const handleStop = () => {

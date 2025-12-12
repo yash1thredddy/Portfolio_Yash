@@ -5,7 +5,7 @@ import {
   ChatBubbleMessage,
 } from '@/components/ui/chat/chat-bubble';
 import { ChatRequestOptions } from 'ai';
-import { Message } from 'ai/react';
+import type { UIMessage as Message } from 'ai';
 import React, { useState, useEffect, useTransition, startTransition } from 'react';
 import ChatMessageContent from './chat-message-content';
 import ToolRenderer from './tool-renderer';
@@ -34,23 +34,45 @@ export const SimplifiedChatView = React.memo(function SimplifiedChatView({
 
   if (message.role !== 'assistant') return null;
 
-  // Extract tool invocations that are in "result" state
+  // Extract tool invocations. AI SDK v5 emits `tool-${name}` parts
   const toolInvocations =
     message.parts
-      ?.filter(
-        (part) =>
-          part.type === 'tool-invocation' &&
-          part.toolInvocation?.state === 'result'
-      )
-      .map((part) =>
-        part.type === 'tool-invocation' ? part.toolInvocation : null
-      )
+      ?.flatMap((part: any) => {
+        // AI SDK v5 format: tool parts have type 'tool-${toolName}'
+        if (typeof part?.type === 'string' && part.type.startsWith('tool-')) {
+          const toolName = part.type.slice('tool-'.length); // Extract tool name from type
+          const toolCallId = part.toolCallId || part.id;
+          const output = part.output ?? part.result;
+
+          // Only include tools that have output available
+          if (toolName && part.state === 'output-available' && output) {
+            return [
+              {
+                toolName,
+                toolCallId: toolCallId || `${toolName}-${Date.now()}`,
+                state: 'result',
+                args: part.input || part.args || {},
+                result: output,
+              },
+            ];
+          }
+        }
+
+        return [];
+      })
       .filter(Boolean) || [];
 
   // Only display the first tool (if any)
   const currentTool = toolInvocations.length > 0 ? [toolInvocations[0]] : [];
 
-  const hasTextContent = message.content.trim().length > 0;
+  const textContent =
+    message.parts
+      ?.filter((part: any) => part.type === 'text')
+      // @ts-ignore - text part shape
+      .map((part: any) => part.text)
+      .join('') || '';
+
+  const hasTextContent = textContent.trim().length > 0;
   const hasTools = currentTool.length > 0;
 
   // Show visual content IMMEDIATELY so users can see/explore while AI generates response
@@ -86,8 +108,6 @@ export const SimplifiedChatView = React.memo(function SimplifiedChatView({
       stopHeavyRendering();
     };
   }, [isLoading, hasTools, shouldRenderTools, startHeavyRendering, stopHeavyRendering]);
-
-  console.log('Debug - hasTools:', hasTools, 'shouldRenderTools:', shouldRenderTools, 'currentTool:', currentTool);
 
   return (
     <div className="flex h-full w-full flex-col px-4">

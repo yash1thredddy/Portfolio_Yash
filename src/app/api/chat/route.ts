@@ -1,19 +1,19 @@
 import { createOpenAI } from '@ai-sdk/openai';
-import { streamText } from 'ai';
-import { LRUCache } from 'lru-cache';
+import { streamText, convertToModelMessages, stepCountIs } from 'ai';
+// Temporarily disabled LRU cache to fix migration issues
+// import { LRUCache } from 'lru-cache';
 import { SYSTEM_PROMPT } from './prompt';
-import {
-  getProjectsCached as getProjects,
-  getPresentationCached as getPresentation,
-  getResumeCached as getResume,
-  getContactCached as getContact,
-  getSkillsCached as getSkills,
-  getSportsCached as getSports,
-  getCrazyCached as getCrazy,
-  getInternshipCached as getInternship,
-  getWeatherCached as getWeather,
-} from './tools-cached';
-import { getCacheStats } from './cache-utils';
+// Temporarily using uncached versions to fix migration issues
+import { getProjects } from './tools/getProjects';
+import { getPresentation } from './tools/getPresentation';
+import { getResume } from './tools/getResume';
+import { getContact } from './tools/getContact';
+import { getSkills } from './tools/getSkills';
+import { getSports } from './tools/getSports';
+import { getCrazy } from './tools/getCrazy';
+import { getInternship } from './tools/getInternship';
+import { getWeather } from './tools/getWeather';
+// import { getCacheStats } from './cache-utils';
 
 // Validate API key is present
 const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -29,6 +29,36 @@ const deepseek = createOpenAI({
   baseURL: 'https://api.deepseek.com',
   apiKey,
   fetch: async (url, init) => {
+    // DeepSeek doesn't support OpenAI "developer" role.
+    // The OpenAI adapter marks unknown model IDs as reasoning models and
+    // auto-converts system messages to developer. Rewrite them here.
+    if (init?.body) {
+      let bodyText: string | undefined;
+      if (typeof init.body === 'string') {
+        bodyText = init.body;
+      } else if (init.body instanceof Uint8Array) {
+        bodyText = new TextDecoder().decode(init.body);
+      } else if (init.body instanceof ArrayBuffer) {
+        bodyText = new TextDecoder().decode(new Uint8Array(init.body));
+      } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(init.body)) {
+        bodyText = init.body.toString('utf8');
+      }
+
+      if (bodyText) {
+        try {
+          const parsed = JSON.parse(bodyText);
+          if (Array.isArray(parsed?.messages)) {
+            parsed.messages = parsed.messages.map((m: any) =>
+              m?.role === 'developer' ? { ...m, role: 'system' } : m
+            );
+            init = { ...init, body: JSON.stringify(parsed) };
+          }
+        } catch {
+          // ignore non-JSON bodies
+        }
+      }
+    }
+
     // Add timeout and retry logic
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
@@ -58,28 +88,42 @@ export const maxDuration = 60; // Increased to 60 seconds
 const MAX_MESSAGES = 50;
 const MAX_MESSAGE_LENGTH = 10000;
 
+// DeepSeek/OpenAI-compatible roles: system|user|assistant|tool
+function normalizeRoles(messages: any[]): any[] {
+  return messages.map((m) => {
+    if (!m || typeof m !== 'object') return m;
+    if (m.role === 'developer') {
+      return { ...m, role: 'system' };
+    }
+    return m;
+  });
+}
+
+// Removed custom toModelMessages - using AI SDK's built-in convertToModelMessages instead
+
+// Temporarily disabled LRU cache to fix migration issues
 // Initialize LRU cache for responses
 // Cache up to 100 responses, with 15-minute TTL
-const responseCache = new LRUCache<string, string>({
-  max: 100, // Maximum number of items in cache
-  ttl: 1000 * 60 * 15, // 15 minutes in milliseconds
-  updateAgeOnGet: true, // Reset TTL on cache hit
-  updateAgeOnHas: false,
-});
+// const responseCache = new LRUCache<string, string>({
+//   max: 100, // Maximum number of items in cache
+//   ttl: 1000 * 60 * 15, // 15 minutes in milliseconds
+//   updateAgeOnGet: true, // Reset TTL on cache hit
+//   updateAgeOnHas: false,
+// });
 
 // Helper function to create cache key from messages
-function createCacheKey(messages: any[]): string {
-  // Create a deterministic key from the last user message
-  // We only cache single-turn conversations for simplicity
-  if (messages.length === 1 && messages[0].role === 'user') {
-    const content = typeof messages[0].content === 'string'
-      ? messages[0].content
-      : JSON.stringify(messages[0].content);
-    // Normalize and hash the content
-    return `chat:${content.toLowerCase().trim().substring(0, 200)}`;
-  }
-  return ''; // Don't cache multi-turn conversations
-}
+// function createCacheKey(messages: any[]): string {
+//   // Create a deterministic key from the last user message
+//   // We only cache single-turn conversations for simplicity
+//   if (messages.length === 1 && messages[0].role === 'user') {
+//     const content = typeof messages[0].content === 'string'
+//       ? messages[0].content
+//       : JSON.stringify(messages[0].content);
+//     // Normalize and hash the content
+//     return `chat:${content.toLowerCase().trim().substring(0, 200)}`;
+//   }
+//   return ''; // Don't cache multi-turn conversations
+// }
 
 // ❌ Pas besoin de l'export ici, Next.js n'aime pas ça
 function errorHandler(error: unknown) {
@@ -98,7 +142,11 @@ function errorHandler(error: unknown) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { messages } = body;
+    const rawMessages =
+      body?.messages ??
+      body?.chat?.messages ??
+      body?.data?.messages;
+    let messages = rawMessages;
 
     // Validate messages array
     if (!messages || !Array.isArray(messages)) {
@@ -134,26 +182,8 @@ export async function POST(req: Request) {
     }
 
     console.log('[CHAT-API] Incoming messages:', messages);
-    console.log('[CACHE-STATS]', getCacheStats());
 
-    // Check cache for single-turn conversations
-    const cacheKey = createCacheKey(messages);
-    if (cacheKey) {
-      const cachedResponse = responseCache.get(cacheKey);
-      if (cachedResponse) {
-        console.log('[CHAT-API] Cache hit for:', cacheKey);
-        // Return cached response as a stream
-        return new Response(cachedResponse, {
-          headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
-            'X-Cache-Status': 'HIT',
-          },
-        });
-      }
-      console.log('[CHAT-API] Cache miss for:', cacheKey);
-    }
-
-    messages.unshift(SYSTEM_PROMPT);
+    messages = normalizeRoles(messages);
 
     const tools = {
       getProjects,
@@ -168,25 +198,45 @@ export async function POST(req: Request) {
     };
 
     try {
+      // AI SDK v5: Use built-in convertToModelMessages
+      const modelMessages = convertToModelMessages(messages);
+
+      console.log('[CHAT-API] Calling streamText with', modelMessages.length, 'messages');
+
+      // AI SDK v5: streamText with multi-step tool calling
       const result = streamText({
-        model: deepseek('deepseek-chat'),
-        messages,
-        toolCallStreaming: true,
+        model: deepseek.chat('deepseek-chat'),
+        system: SYSTEM_PROMPT.content,
+        messages: modelMessages,
         tools,
-        maxSteps: 2,
+        // CRITICAL: Enable multi-step tool calling
+        // This allows the AI to call tools AND generate text responses
+        stopWhen: stepCountIs(5), // Allow up to 5 steps for tool calls + text generation
+        // Monitor each step completion
+        onStepFinish: async (event) => {
+          console.log('[CHAT-API] Step finished:', {
+            finishReason: event.finishReason,
+            text: event.text?.substring(0, 100) || '(no text)',
+            toolCalls: event.toolCalls?.length || 0,
+            toolResults: event.toolResults?.length || 0,
+          });
+        },
+        // Monitor final completion
+        onFinish: async (event) => {
+          console.log('[CHAT-API] All steps finished:', {
+            finishReason: event.finishReason,
+            text: event.text?.substring(0, 100) || '(no text)',
+            usage: event.usage,
+            steps: event.steps?.length || 0,
+          });
+        },
       });
 
-      // For cacheable requests, store the response
-      // Note: Streaming responses are harder to cache, so we'll cache after completion
-      // For now, we'll add a header to indicate cache miss
-      const response = result.toDataStreamResponse({
-        getErrorMessage: errorHandler,
-      });
+      console.log('[CHAT-API] streamText result obtained, converting to response');
 
-      // Add cache status header
-      response.headers.set('X-Cache-Status', 'MISS');
-
-      return response;
+      // AI SDK v5: Return UI message stream response for useChat hook
+      // This properly streams both tool calls AND text to the client
+      return result.toUIMessageStreamResponse();
     } catch (streamError: any) {
       // Handle streaming/connection errors specifically
       console.error('[CHAT-API] Stream error:', streamError);

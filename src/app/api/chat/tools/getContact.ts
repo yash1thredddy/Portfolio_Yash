@@ -1,10 +1,10 @@
 import { tool } from 'ai';
-import { z } from 'zod';
+import { jsonSchema } from '@ai-sdk/provider-utils';
 
 export const getContact = tool({
   description:
     'Shows contact information including email, phone, location, LinkedIn, and GitHub. Use this when users ask how to contact me, reach out, connect, or get in touch.',
-  parameters: z.object({}),
+  inputSchema: jsonSchema({ type: 'object', properties: {} }),
   execute: async () => {
     return `[INTERNAL DATA - DO NOT DISPLAY TO USER - USE THIS TO WRITE YOUR RESPONSE]
 

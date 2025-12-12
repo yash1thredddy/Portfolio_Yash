@@ -1,10 +1,10 @@
 import { tool } from 'ai';
-import { z } from 'zod';
+import { jsonSchema } from '@ai-sdk/provider-utils';
 
 export const getInternship = tool({
   description:
     "🚨 CALL THIS FOR EXPERIENCE/JOB QUESTIONS 🚨 Returns reference data. YOU MUST write a 3-5 paragraph conversational response using this data. DO NOT display this output to users!",
-  parameters: z.object({}),
+  inputSchema: jsonSchema({ type: 'object', properties: {} }),
   execute: async () => {
     return `[INTERNAL DATA - DO NOT DISPLAY TO USER - USE THIS TO WRITE YOUR RESPONSE]
 
