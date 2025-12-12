@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { Code, Cpu, PenTool, Users } from 'lucide-react';
+import { memo } from 'react';
 
-const Skills = () => {
+const Skills = memo(() => {
   const skillsData = [
     {
       category: 'Languages',
@@ -140,13 +141,13 @@ const Skills = () => {
     },
   ];
 
-  // Animation variants
+  // Animation variants - Faster for immediate display
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.05, // Faster stagger
       },
     },
   };
@@ -156,7 +157,7 @@ const Skills = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.19, 1, 0.22, 1] },
+      transition: { duration: 0.3 }, // Faster animation
     },
   };
 
@@ -165,7 +166,7 @@ const Skills = () => {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.3, ease: 'easeOut' },
+      transition: { duration: 0.2 }, // Faster badges
     },
   };
 
@@ -175,6 +176,7 @@ const Skills = () => {
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
       className="mx-auto w-full max-w-5xl rounded-4xl"
+      style={{ contain: 'layout style paint' }}
     >
       <Card className="w-full border-none bg-transparent px-0 pb-12 text-black shadow-none dark:text-white">
         <CardHeader className="px-0 pb-1">
@@ -231,6 +233,8 @@ const Skills = () => {
       </Card>
     </motion.div>
   );
-};
+});
+
+Skills.displayName = 'Skills';
 
 export default Skills;

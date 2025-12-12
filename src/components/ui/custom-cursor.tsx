@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePerformance } from '@/contexts/PerformanceContext';
 
 interface Particle {
   x: number;
@@ -20,6 +21,7 @@ export default function CustomCursor() {
   const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number>(0);
   const hueRef = useRef(0);
+  const { isHeavyRendering } = usePerformance();
 
   useEffect(() => {
     // Only run on desktop (not mobile)
@@ -33,10 +35,15 @@ export default function CustomCursor() {
     canvas.style.height = '100vh';
     canvas.style.pointerEvents = 'none';
     canvas.style.zIndex = '9999';
+    canvas.style.opacity = '0.6'; // Reduced opacity for subtler effect
     document.body.appendChild(canvas);
     canvasRef.current = canvas;
 
-    const ctx = canvas.getContext('2d', { alpha: true });
+    const ctx = canvas.getContext('2d', { 
+      alpha: true,
+      desynchronized: true, // Better performance
+      willReadFrequently: false
+    });
     if (!ctx) return;
 
     const resizeCanvas = () => {
@@ -75,6 +82,15 @@ export default function CustomCursor() {
     const animate = () => {
       if (!ctx || !canvas) return;
 
+      // Pause animation during heavy rendering
+      if (isHeavyRendering) {
+        // Clear particles and canvas during heavy rendering
+        particlesRef.current = [];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        rafRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
       // Clear canvas completely for transparency
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -102,11 +118,11 @@ export default function CustomCursor() {
       const dy = mouse.y - mouse.lastY;
       const speed = Math.sqrt(dx * dx + dy * dy);
 
-      // Create particles based on movement
-      if (speed > 0.5) {
-        const numParticles = Math.min(Math.floor(speed / 5), 3);
+      // Create fewer particles for better performance
+      if (speed > 1) {
+        const numParticles = Math.min(Math.floor(speed / 8), 2); // Reduced particles
         for (let i = 0; i < numParticles; i++) {
-          createParticle(mouse.x, mouse.y, speed / 10);
+          createParticle(mouse.x, mouse.y, speed / 12);
         }
       }
 

@@ -6,18 +6,18 @@ const useFluidCursor = () => {
   //try to adjust settings
 
   let config = {
-    SIM_RESOLUTION: 128,
-    DYE_RESOLUTION: 1440,
-    CAPTURE_RESOLUTION: 1512,
-    DENSITY_DISSIPATION: 0.5,
-    VELOCITY_DISSIPATION: 3,
-    PRESSURE: 0.1,
-    PRESSURE_ITERATIONS: 20,
-    CURL: 3,
-    SPLAT_RADIUS: 0.2,
-    SPLAT_FORCE: 6000,
-    SHADING: true,
-    COLOR_UPDATE_SPEED: 10,
+    SIM_RESOLUTION: 64,           // Reduced from 128 (50% less computation)
+    DYE_RESOLUTION: 512,           // Reduced from 1440 (much lighter)
+    CAPTURE_RESOLUTION: 512,       // Reduced from 1512
+    DENSITY_DISSIPATION: 0.97,     // Faster dissipation (cleaner)
+    VELOCITY_DISSIPATION: 0.98,    // Faster dissipation
+    PRESSURE: 0.8,
+    PRESSURE_ITERATIONS: 15,       // Reduced from 20
+    CURL: 20,
+    SPLAT_RADIUS: 0.15,            // Smaller radius (less area to compute)
+    SPLAT_FORCE: 4000,             // Reduced force (lighter effect)
+    SHADING: false,                // Disabled shading (performance boost)
+    COLOR_UPDATE_SPEED: 5,         // Slower color changes
     PAUSED: false,
     BACK_COLOR: { r: 0.5, g: 0, b: 0 },
     TRANSPARENT: true,

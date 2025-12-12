@@ -316,7 +316,7 @@ const Chat = () => {
                 className="pb-24 md:pb-32"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
+                transition={{ duration: 0.3 }}
               >
                 <SimplifiedChatView
                   message={currentAIMessage}
@@ -331,7 +331,7 @@ const Chat = () => {
                   key="loading"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  transition={{ duration: 0.2 }}
                   className="px-4 pt-18"
                 >
                   <ChatBubble variant="received">

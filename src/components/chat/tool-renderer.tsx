@@ -1,14 +1,58 @@
 // src/components/chat/tool-renderer.tsx
+'use client';
 import { Contact } from '../contact';
 import Crazy from '../crazy';
 import InternshipCard from '../InternshipCard';
 import { Presentation } from '../presentation';
-import AllProjects from '../projects/AllProjects';
 import Resume from '../resume';
 import Skills from '../skills';
 import Sports from '../sport';
+import AllProjects from '../projects/AllProjects';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Suspense, lazy, memo } from 'react';
+
+// Memoized wrapper to prevent unnecessary re-renders
+const MemoizedAllProjects = memo(AllProjects);
+const MemoizedSkills = memo(Skills);
+
+// Loading skeleton for projects
+const ProjectsLoadingSkeleton = () => (
+  <div className="w-full h-full pt-8 animate-pulse">
+    <div className="max-w-7xl mx-auto mb-8">
+      <div className="h-8 bg-neutral-200 dark:bg-neutral-800 rounded w-48 mb-4"></div>
+    </div>
+    <div className="flex gap-4 overflow-hidden px-4">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="flex-shrink-0 w-56 h-80 bg-neutral-200 dark:bg-neutral-800 rounded-3xl"
+        ></div>
+      ))}
+    </div>
+  </div>
+);
+
+// Loading skeleton for skills
+const SkillsLoadingSkeleton = () => (
+  <div className="w-full animate-pulse">
+    <div className="rounded-xl border bg-card p-6">
+      <div className="h-6 bg-neutral-200 dark:bg-neutral-800 rounded w-32 mb-4"></div>
+      <div className="space-y-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="space-y-2">
+            <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-40"></div>
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3, 4, 5].map((j) => (
+                <div key={j} className="h-6 w-16 bg-neutral-200 dark:bg-neutral-800 rounded-full"></div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 interface ToolRendererProps {
   toolInvocations: any[];
@@ -19,10 +63,17 @@ export default function ToolRenderer({
   toolInvocations,
   messageId,
 }: ToolRendererProps) {
+  console.log('ToolRenderer - toolInvocations:', toolInvocations);
+  
+  if (!toolInvocations || toolInvocations.length === 0) {
+    return null;
+  }
+
   return (
     <div className="w-full">
       {toolInvocations.map((tool) => {
         const { toolCallId, toolName } = tool;
+        console.log('Rendering tool:', toolName, 'with ID:', toolCallId);
 
         // Return specialized components based on tool name
         switch (toolName) {
@@ -32,7 +83,7 @@ export default function ToolRenderer({
                 key={toolCallId}
                 className="w-full overflow-hidden rounded-lg"
               >
-                <AllProjects />
+                <MemoizedAllProjects />
               </div>
             );
 
@@ -63,7 +114,7 @@ export default function ToolRenderer({
           case 'getSkills':
             return (
               <div key={toolCallId} className="w-full rounded-lg">
-                <Skills />
+                <MemoizedSkills />
               </div>
             );
 
